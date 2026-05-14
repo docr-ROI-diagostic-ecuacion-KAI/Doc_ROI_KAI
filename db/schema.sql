@@ -2,6 +2,9 @@ create table if not exists companies (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   contact_email text not null unique,
+  sector text,
+  company_size text,
+  digital_maturity text,
   created_at timestamptz not null default now()
 );
 
@@ -39,5 +42,24 @@ create table if not exists kai_results (
   roi_i numeric,
   ce_i numeric,
   calculated_outputs jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists diagnostic_interpretation_rules (
+  id uuid primary key default gen_random_uuid(),
+  variable_id text not null,
+  variable_name text not null,
+  score_min numeric not null,
+  score_max numeric not null,
+  level_label text not null,
+  executive_meaning text not null,
+  business_risk text not null,
+  probable_cause text not null,
+  recommendation_text text not null,
+  solution_name text not null,
+  solution_url text,
+  priority text not null,
+  report_tone text not null,
+  c_level_summary text not null,
   created_at timestamptz not null default now()
 );
