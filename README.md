@@ -10,11 +10,16 @@ Cuando este desplegado en Vercel, abrir:
 /diagnosis
 ```
 
+## Version actual
+
+Cuestionario C-Level reducido a 10 preguntas, alineado con la tabla KAI/JAI indicada.
+
 ## Que incluye
 
 - Landing de diagnostico estilo Doc ROI.
-- Formulario multipaso con 30 preguntas.
-- Escala del Excel final: 0 a 5.
+- Formulario multipaso con 10 preguntas C-Level.
+- Escala ejecutiva 1 a 5.
+- Accion recomendada automatica cuando una palanca puntua 3 o menos.
 - Normalizacion a rango 0 a 1.
 - Calculo oficial KAI ROI:
 
@@ -28,9 +33,18 @@ ROI_i = (VA_i - C_i) / C_i
 CE_i = (ROI_i - WACC_t) / WACC_t
 ```
 
-- Informe ejecutivo HTML.
-- Boton Download PDF mediante imprimir/guardar como PDF.
-- CTA para consulta Doc ROI.
+## Variables cubiertas
+
+- phi_i: alineacion estrategica.
+- u_i: madurez decisional.
+- f_i: activacion relacional.
+- psi_i: dato + inteligencia.
+- SPO_i/RFM: comportamiento cliente.
+- SPO_i/ABC: optimizacion portfolio.
+- SPO_i/NPS: experiencia cliente.
+- Modelo SPO: orquestacion comercial diagnostica.
+- P_i: productividad empresarial.
+- Gamma_g(i),t: salud de cartera.
 
 ## Deploy en Vercel
 
