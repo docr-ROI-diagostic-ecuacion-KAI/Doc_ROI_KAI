@@ -1,0 +1,9 @@
+<svg width="515" height="180" viewBox="0 0 515 180" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title id="title">DocROI</title>
+  <rect width="515" height="180" fill="#000000"/>
+  <path d="M24 38H95C132 38 160 66 160 90C160 114 132 142 95 142H24L54 109H96C111 109 124 101 124 90C124 79 111 71 96 71H54L24 38Z" fill="#FFFFFF"/>
+  <path d="M24 142L60 104V76L24 38H83C119 38 147 60 147 90C147 120 119 142 83 142H24Z" fill="#FFFFFF" opacity="0.98"/>
+  <path d="M24 71L53 90L24 109H86C105 109 119 101 119 90C119 79 105 71 86 71H24Z" fill="#000000"/>
+  <text x="178" y="114" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800" letter-spacing="-3">Doc</text>
+  <text x="324" y="114" fill="#A9A9A9" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800" letter-spacing="-3">ROI</text>
+</svg>
