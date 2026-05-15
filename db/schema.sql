@@ -5,6 +5,11 @@ create table if not exists companies (
   sector text,
   company_size text,
   digital_maturity text,
+  rgpd_consent boolean not null default false,
+  rgpd_consent_at timestamptz,
+  rgpd_consent_text text,
+  marketing_consent boolean not null default false,
+  privacy_policy_url text,
   created_at timestamptz not null default now()
 );
 
@@ -15,6 +20,12 @@ create table if not exists diagnosis_sessions (
   raw_answers jsonb not null,
   normalized_inputs jsonb not null,
   calculated_outputs jsonb not null,
+  rgpd_consent boolean not null default false,
+  rgpd_consent_at timestamptz,
+  rgpd_consent_text text,
+  rgpd_legal_basis text,
+  marketing_consent boolean not null default false,
+  privacy_policy_url text,
   created_at timestamptz not null default now()
 );
 
@@ -63,3 +74,16 @@ create table if not exists diagnostic_interpretation_rules (
   c_level_summary text not null,
   created_at timestamptz not null default now()
 );
+
+-- If tables already existed before RGPD fields, run-safe migrations:
+alter table companies add column if not exists rgpd_consent boolean not null default false;
+alter table companies add column if not exists rgpd_consent_at timestamptz;
+alter table companies add column if not exists rgpd_consent_text text;
+alter table companies add column if not exists marketing_consent boolean not null default false;
+alter table companies add column if not exists privacy_policy_url text;
+alter table diagnosis_sessions add column if not exists rgpd_consent boolean not null default false;
+alter table diagnosis_sessions add column if not exists rgpd_consent_at timestamptz;
+alter table diagnosis_sessions add column if not exists rgpd_consent_text text;
+alter table diagnosis_sessions add column if not exists rgpd_legal_basis text;
+alter table diagnosis_sessions add column if not exists marketing_consent boolean not null default false;
+alter table diagnosis_sessions add column if not exists privacy_policy_url text;
