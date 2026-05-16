@@ -49,9 +49,9 @@ export async function POST(request){
       .insert({
         company_id: company.id,
         email,
-        raw_answers: body.raw_answers || {},
-        normalized_inputs: body.normalized_inputs || {},
-        calculated_outputs: body.calculated_outputs || {},
+        raw_answers: body.raw_answers ?? {},
+        normalized_inputs: body.normalized_inputs ?? {},
+        calculated_outputs: body.calculated_outputs ?? {},
         rgpd_consent: true,
         rgpd_consent_at: rgpd.acceptedAt,
         rgpd_consent_text: rgpd.text,
@@ -73,8 +73,8 @@ export async function POST(request){
         block: 'C-Level diagnosis',
         variable: card.variable,
         question_text: card.question,
-        raw_value: score[card.id] || card.raw || 0,
-        normalized_value: card.normalized || 0,
+        raw_value: score[card.id] ?? card.raw ?? null,
+        normalized_value: card.normalized ?? null,
         weight: 1
       })));
     }
@@ -82,11 +82,11 @@ export async function POST(request){
     const out = body.calculated_outputs || {};
     await supabase.from('kai_results').insert({
       session_id: session.id,
-      kai_i_star: out.KAI_i_star || 0,
-      psi_i: out.psi_i || 0,
-      spo_i: out.SPO_i || 0,
-      md_i: out.MD_i || 0,
-      va_i: out.VA_i || 0,
+      kai_i_star: out.KAI_i_star ?? null,
+      psi_i: out.psi_i ?? null,
+      spo_i: out.SPO_i ?? null,
+      md_i: out.MD_i ?? null,
+      va_i: out.VA_i ?? null,
       roi_i: out.ROI_i ?? null,
       ce_i: out.CE_i ?? null,
       calculated_outputs: out
