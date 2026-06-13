@@ -18,11 +18,11 @@ export default function RootLayout({ children }) {
                 function run(){
                   var cta = document.querySelector('.siteHeader .navCta');
                   if (!cta) return;
-                  cta.textContent = 'Ecuación KAI';
-                  cta.setAttribute('href', 'https://docroi.marketing/kai-equation/');
-                  cta.setAttribute('aria-label', 'Ecuación KAI');
-                  cta.setAttribute('target', '_blank');
-                  cta.setAttribute('rel', 'noopener noreferrer');
+                  if (cta.textContent !== 'Ecuación KAI') cta.textContent = 'Ecuación KAI';
+                  if (cta.getAttribute('href') !== 'https://docroi.marketing/kai-equation/') cta.setAttribute('href', 'https://docroi.marketing/kai-equation/');
+                  if (cta.getAttribute('aria-label') !== 'Ecuación KAI') cta.setAttribute('aria-label', 'Ecuación KAI');
+                  if (cta.getAttribute('target') !== '_blank') cta.setAttribute('target', '_blank');
+                  if (cta.getAttribute('rel') !== 'noopener noreferrer') cta.setAttribute('rel', 'noopener noreferrer');
                 }
                 if (document.readyState === 'loading') {
                   document.addEventListener('DOMContentLoaded', run);
@@ -31,7 +31,6 @@ export default function RootLayout({ children }) {
                 }
                 setTimeout(run, 250);
                 setTimeout(run, 900);
-                new MutationObserver(run).observe(document.documentElement, { childList: true, subtree: true });
               })();
 
               (function prepareDiagnosisSession(){
@@ -44,7 +43,7 @@ export default function RootLayout({ children }) {
                 var prepared = false;
                 function run(){
                   document.querySelectorAll('.field input').forEach(function(input){
-                    input.setAttribute('autocomplete', 'off');
+                    if (input.getAttribute('autocomplete') !== 'off') input.setAttribute('autocomplete', 'off');
                   });
 
                   var consent = document.querySelector('.field.consent input[type="checkbox"]');
@@ -79,7 +78,7 @@ export default function RootLayout({ children }) {
                     var percent = Number(raw.replace('%', '').replace('.', '').replace(',', '.'));
                     if (!Number.isFinite(percent)) return;
                     value.textContent = formatMultiple(percent / 100);
-                    if (label === 'Customer Equity') {
+                    if (label === 'Customer Equity' && note) {
                       note.textContent = 'Veces que el ROI estimado queda por encima del WACC. Ejemplo: 3,5x significa 3,5 veces sobre la referencia financiera.';
                     } else if (note) {
                       note.textContent = 'Suma ejecutiva de unidades evaluadas, expresada como veces sobre WACC en esta version del diagnostico.';
@@ -101,10 +100,8 @@ export default function RootLayout({ children }) {
                   if (!button || button.disabled) return;
                   setTimeout(scrollToCabinet, 90);
                   setTimeout(scrollToCabinet, 260);
+                  setTimeout(convertCustomerEquityToMultiples, 500);
                 }, true);
-
-                var observer = new MutationObserver(convertCustomerEquityToMultiples);
-                observer.observe(document.documentElement, { childList: true, subtree: true });
 
                 if (document.readyState === 'loading') {
                   document.addEventListener('DOMContentLoaded', run);
