@@ -13,6 +13,7 @@ export default function RootLayout({ children }) {
           .siteHeader .navLinks a:not(.navCta){display:none!important}
           .vitamin .btn.primary{display:none!important}
           .noPrint a.btn,.noPrint button.btn:not(:first-child){display:none!important}
+          .actions button[disabled]{display:none!important}
           .calculationBridge{margin:18px 0 0;padding:22px;border:1px solid rgba(199,206,216,.86);border-radius:24px;background:linear-gradient(180deg,#fff,#F6F7F9);box-shadow:0 12px 34px rgba(11,15,25,.05);color:#111827}
           .calculationBridge h3{margin:0 0 8px;color:#0B0F19;font-size:22px;line-height:1.2}.calculationBridge .bridgeLead{margin:0 0 16px;color:#6B7280;line-height:1.6}.bridgeGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.bridgeItem{border:1px solid rgba(199,206,216,.82);border-radius:16px;background:#fff;padding:13px}.bridgeItem b{display:block;color:#003B5C;font-size:12px;margin-bottom:6px}.bridgeItem span{display:block;color:#0B0F19;font-size:20px;font-weight:900}.bridgeFormula{margin:14px 0 0;padding:14px;border-radius:16px;background:#0B0F19;color:#fff;line-height:1.55}.bridgeFormula code{color:#D8ECF8}.bridgeWarning{margin:14px 0 0;padding:14px;border-radius:16px;background:#F1F4F8;color:#111827;line-height:1.6}.bridgeWarning b{color:#003B5C}.pdfFinalDownload{margin:28px 0 4px;padding:24px;border:1px solid rgba(199,206,216,.86);border-radius:24px;background:#F6F7F9;text-align:center;color:#111827}.pdfFinalDownload strong{display:block;color:#0B0F19;font-size:20px;margin-bottom:8px}.pdfFinalDownload p{margin:0 auto 16px;max-width:680px;color:#6B7280;line-height:1.6}
           @media(max-width:850px){.bridgeGrid{grid-template-columns:1fr}}
@@ -48,7 +49,7 @@ export default function RootLayout({ children }) {
                   if (consent && !consent.checked) consent.click();
                   convertCustomerEquityToMultiples();
                   transformFinancialCards();
-                  buildCalculationBridge();
+                  applySimpleFinancialModel();
                   explainMetricCards();
                   preparePdfActions();
                   if (!prepared) { prepared = true; setTimeout(run, 250); setTimeout(run, 900); }
@@ -93,32 +94,36 @@ export default function RootLayout({ children }) {
                 function transformFinancialCards(){
                   var economics = calculateDeclaredEconomics(); var marginCard = cardByTitle('Margen diagnosticado');
                   if (marginCard) { var marginValue = marginCard.querySelector('span'); var marginNote = marginCard.querySelector('p.small'); if (marginValue && economics.marginRate !== null) marginValue.textContent = formatPercent(economics.marginRate, 1); if (marginNote) marginNote.textContent = 'Margen capturable estimado sobre la base economica declarada. Ayuda a entender que parte del potencial podria convertirse en valor.'; }
-                  var roiCard = cardByTitle('Customer Equity empresa'); var ceText = readMetric('Customer Equity'); var ceMultiple = ceText && ceText.indexOf('x') > -1 ? readNumber(ceText) : null;
-                  if (roiCard) { var title = roiCard.querySelector('strong'); var value = roiCard.querySelector('span'); var note = roiCard.querySelector('p.small'); if (title) title.textContent = 'ROI'; if (value) { var roi = ceMultiple !== null && economics.WACC !== null ? economics.WACC * (ceMultiple + 1) : null; value.textContent = roi !== null ? formatPercent(roi, 1) : 'no calculable'; } if (note) note.textContent = 'Retorno estimado del escenario antes de compararlo con el WACC. Si ROI supera WACC, empieza a crear Customer Equity.'; }
+                  var roiCard = cardByTitle('Customer Equity empresa'); if (roiCard) { var title = roiCard.querySelector('strong'); if (title) title.textContent = 'ROI'; }
                 }
-                function buildCalculationBridge(){
-                  var metrics = document.querySelector('.metrics'); if (!metrics || document.querySelector('.calculationBridge')) return;
-                  var economics = calculateDeclaredEconomics(); var kaiPct = readNumber(readMetric('Potencial de activacion')); var kaiRate = kaiPct !== null ? kaiPct / 100 : null;
-                  var va = economics.MD !== null && kaiRate !== null ? economics.MD * kaiRate : null;
-                  var roi = va !== null && economics.C ? (va - economics.C) / economics.C : null;
-                  var ce = roi !== null && economics.WACC ? (roi - economics.WACC) / economics.WACC : null;
-                  var kaiBreakEven = economics.MD && economics.C ? economics.C / economics.MD : null;
-                  var kaiForCE = economics.MD && economics.C && economics.WACC ? (economics.C * (1 + economics.WACC)) / economics.MD : null;
+                function applySimpleFinancialModel(){
+                  var metrics = document.querySelector('.metrics'); if (!metrics) return;
+                  var economics = calculateDeclaredEconomics();
+                  var roi = economics.MD !== null && economics.C ? (economics.MD - economics.C) / economics.C : null;
+                  var ce = roi !== null && economics.WACC !== null ? roi - economics.WACC : null;
+                  var net = economics.MD !== null && economics.C ? economics.MD - economics.C : null;
+                  var ceCard = cardByTitle('Customer Equity');
+                  if (ceCard) { var ceValue = ceCard.querySelector('span'); var ceNote = ceCard.querySelector('p.small'); if (ceValue) ceValue.textContent = formatPercent(ce,1); if (ceNote) ceNote.textContent = 'Customer Equity ejecutivo: ROI simple menos WACC. Si es positivo, el escenario supera la referencia financiera declarada.'; }
+                  var roiCard = cardByTitle('ROI');
+                  if (roiCard) { var roiValue = roiCard.querySelector('span'); var roiNote = roiCard.querySelector('p.small'); if (roiValue) roiValue.textContent = formatPercent(roi,1); if (roiNote) roiNote.textContent = 'ROI simple del escenario: retorno potencial menos coste, dividido entre el coste.'; }
+                  var cartera = cardByTitle('Cartera positiva');
+                  if (cartera) { var cVal = cartera.querySelector('span'); var cNote = cartera.querySelector('p.small'); if (cVal) cVal.textContent = ce !== null && ce > 0 ? '100%' : '0%'; if (cNote) cNote.textContent = 'En esta beta hay una unidad evaluada. Sube a 100% cuando Customer Equity es positivo.'; }
+                  var old = document.querySelector('.calculationBridge'); if (old) old.remove();
                   var positive = ce !== null && ce > 0;
                   var block = document.createElement('div'); block.className = 'calculationBridge';
                   block.innerHTML = '<h3>Cómo se ha construido el resultado</h3>'+
-                    '<p class="bridgeLead">Aquí se ve la cadena completa. El potencial económico bruto puede ser mayor que el coste, pero la ecuación KAI·ROI calcula primero cuánto de ese potencial consigue activar realmente la organización.</p>'+
+                    '<p class="bridgeLead">Lectura financiera simple para dirección: primero se calcula el potencial económico bruto; después se compara contra el coste. KAI queda como diagnóstico de capacidad, no como una resta del dinero conseguido.</p>'+
                     '<div class="bridgeGrid">'+
-                    '<div class="bridgeItem"><b>Potencial bruto MD</b><span>'+formatMoney(economics.MD)+'</span></div>'+
-                    '<div class="bridgeItem"><b>KAI aplicado</b><span>'+formatPercent(kaiRate,3)+'</span></div>'+
-                    '<div class="bridgeItem"><b>Valor activado VA</b><span>'+formatMoney(va)+'</span></div>'+
+                    '<div class="bridgeItem"><b>Retorno bruto estimado</b><span>'+formatMoney(economics.MD)+'</span></div>'+
                     '<div class="bridgeItem"><b>Coste declarado</b><span>'+formatMoney(economics.C)+'</span></div>'+
-                    '<div class="bridgeItem"><b>ROI calculado</b><span>'+formatPercent(roi,1)+'</span></div>'+
+                    '<div class="bridgeItem"><b>Beneficio neto</b><span>'+formatMoney(net)+'</span></div>'+
+                    '<div class="bridgeItem"><b>ROI simple</b><span>'+formatPercent(roi,1)+'</span></div>'+
                     '<div class="bridgeItem"><b>WACC declarado</b><span>'+formatPercent(economics.WACC,1)+'</span></div>'+
-                    '<div class="bridgeItem"><b>KAI mínimo para no perder</b><span>'+formatPercent(kaiBreakEven,1)+'</span></div>'+
-                    '<div class="bridgeItem"><b>KAI mínimo para crear CE</b><span>'+formatPercent(kaiForCE,1)+'</span></div>'+
-                    '</div><div class="bridgeFormula"><code>MD = Ingresos · captura + Eficiencia · captura</code><br/><code>VA = KAI_i* · MD</code><br/><code>ROI = (VA - Coste) / Coste</code><br/><code>CE = (ROI - WACC) / WACC</code></div>'+
-                    '<div class="bridgeWarning"><b>Lectura ejecutiva:</b> '+(positive ? 'El escenario supera el WACC: el ROI estimado empieza a crear Customer Equity. El foco ahora es escalar sin perder control.' : 'El potencial bruto existe, pero el KAI activable todavía no convierte suficiente valor. Para que el resultado suba, hay que aumentar KAI/SPO, mejorar el margen capturable o reducir el coste de la iniciativa.')+'</div>';
+                    '<div class="bridgeItem"><b>Customer Equity</b><span>'+formatPercent(ce,1)+'</span></div>'+
+                    '<div class="bridgeItem"><b>KAI diagnóstico</b><span>'+readMetric('Potencial de activacion')+'</span></div>'+
+                    '<div class="bridgeItem"><b>Cartera positiva</b><span>'+(positive ? '100%' : '0%')+'</span></div>'+
+                    '</div><div class="bridgeFormula"><code>Retorno bruto = Ingresos · captura + Eficiencia · captura</code><br/><code>ROI = (Retorno bruto - Coste) / Coste</code><br/><code>Customer Equity = ROI - WACC</code></div>'+
+                    '<div class="bridgeWarning"><b>Lectura ejecutiva:</b> '+(positive ? 'El escenario crea valor financiero: el ROI simple supera el WACC declarado. KAI indica ahora dónde reforzar la capacidad para hacer ese retorno más repetible y escalable.' : 'El escenario todavía no supera la referencia financiera. Para subirlo hay que aumentar retorno bruto, reducir coste o revisar el WACC objetivo.')+'</div>';
                   metrics.insertAdjacentElement('afterend', block);
                 }
                 function preparePdfActions(){
@@ -126,21 +131,21 @@ export default function RootLayout({ children }) {
                   var panel = document.querySelector('.panel.result'); if (!panel || panel.querySelector('.pdfFinalDownload')) return; var block = document.createElement('div'); block.className = 'pdfFinalDownload noPrint'; block.innerHTML = '<strong>Tu diagnóstico está listo</strong><p>Descarga una copia limpia del informe para revisarla con calma o compartirla internamente con tu equipo directivo.</p><button class="btn primary" type="button">Descargar diagnóstico en PDF</button>'; var button = block.querySelector('button'); button.addEventListener('click', function(){ window.print(); }); panel.appendChild(block);
                 }
                 function explanationFor(label, rawValue){
-                  var kai = readNumber(readMetric('Potencial de activacion')); var data = readNumber(readMetric('Inteligencia de datos')); var spo = readNumber(readMetric('Orquestacion cliente-oferta')); var maturity = readNumber(readMetric('Madurez ejecutiva')); var ce = rawValue && rawValue.indexOf('x') > -1 ? readNumber(rawValue) : null;
-                  if (label === 'Potencial de activacion') { if (kai !== null && kai < 1) return 'Sale bajo porque KAI·ROI es multiplicativo: si una capacidad es débil, reduce todo el resultado. Suele venir de datos, SPO, productividad o cartera poco conectados.'; if (kai !== null && kai < 5) return 'Hay base, pero todavía no toda la cadena convierte decisión, dato y ejecución en valor. Una mejora pequeña en varias capacidades puede mover mucho el resultado.'; return 'El sistema muestra buena capacidad de activación: las respuestas indican que la organización ya conecta mejor decisión, datos y ejecución.'; }
-                  if (label === 'Inteligencia de datos') { if (data !== null && data <= 60) return 'El dato todavía ayuda solo de forma parcial. Hay señales útiles, pero aún falta convertirlas en decisiones repetibles, priorización y acciones comerciales conectadas.'; return 'El dato ya empieza a trabajar para la dirección. La oportunidad está en automatizarlo y llevarlo a decisiones repetibles.'; }
+                  var kai = readNumber(readMetric('Potencial de activacion')); var data = readNumber(readMetric('Inteligencia de datos')); var spo = readNumber(readMetric('Orquestacion cliente-oferta')); var maturity = readNumber(readMetric('Madurez ejecutiva')); var ce = rawValue && rawValue.indexOf('%') > -1 ? readNumber(rawValue) : null;
+                  if (label === 'Potencial de activacion') { if (kai !== null && kai < 1) return 'KAI sale bajo porque varias capacidades directivas y operativas todavía no están conectadas. Ahora no reduce el ROI simple, pero sí señala dónde reforzar la capacidad para que el resultado sea repetible.'; if (kai !== null && kai < 5) return 'Hay base, pero todavía no toda la cadena convierte decisión, dato y ejecución en valor de forma estable. KAI ayuda a localizar dónde mejorar.'; return 'El sistema muestra buena capacidad de activación: la organización conecta mejor decisión, datos y ejecución.'; }
+                  if (label === 'Inteligencia de datos') { if (data !== null && data <= 60) return 'El dato todavía ayuda solo de forma parcial. Hay señales útiles, pero falta convertirlas en decisiones repetibles, priorización y acciones comerciales conectadas.'; return 'El dato ya empieza a trabajar para la dirección. La oportunidad está en automatizarlo y llevarlo a decisiones repetibles.'; }
                   if (label === 'Orquestacion cliente-oferta') { if (spo !== null && spo < 40) return 'Este valor baja cuando comportamiento cliente, rentabilidad de oferta o satisfacción no están bien conectados. Si una de esas piezas falla, SPO cae mucho.'; return 'Clientes, oferta y satisfacción están razonablemente conectados. El siguiente paso es usarlo para priorizar cartera y acciones.'; }
-                  if (label === 'Margen diagnosticado') return 'Este porcentaje sale de dividir el margen capturable estimado entre la base economica declarada. Sube si aumenta el potencial capturable o la eficiencia, y baja si el potencial realista es menor.';
-                  if (label === 'Customer Equity') { if (ce !== null && ce < 0) return 'Sale negativo porque el ROI estimado no supera el WACC. Para subirlo hay cuatro palancas: mejorar KAI, fortalecer SPO, aumentar margen capturable o reducir el coste atribuible.'; if (ce !== null && ce < 1) return 'Es positivo, pero todavía bajo: el ROI supera el WACC, aunque con poco margen. La mejora suele venir de subir KAI, aumentar margen capturable o controlar coste.'; if (ce !== null && ce < 3) return 'El resultado ya supera la referencia financiera. Probablemente ayudan un coste razonable, un WACC no demasiado exigente y margen activable suficiente.'; return 'Resultado fuerte: el ROI estimado queda varias veces por encima del WACC. Suele explicarse por alto margen activable, coste controlado y una cadena KAI suficientemente conectada.'; }
-                  if (label === 'ROI') return 'Este es el retorno estimado del escenario. Para crear Customer Equity debe ser mayor que el WACC declarado; si queda por debajo, el proyecto puede mover actividad pero no crear valor financiero suficiente.';
-                  if (label === 'Cartera positiva') return 'Sube cuando las unidades, clientes o segmentos analizados tienen Customer Equity mayor que cero. En sencillo: ROI debe superar WACC. En esta beta solo hay una unidad; por eso puede aparecer 0% o 100%.';
+                  if (label === 'Margen diagnosticado') return 'Este porcentaje sale de dividir el retorno bruto estimado entre la base económica declarada. Ayuda a ver la intensidad económica del escenario.';
+                  if (label === 'Customer Equity') { if (ce !== null && ce < 0) return 'Sale negativo porque el ROI simple no supera el WACC. El negocio puede recuperar parte del coste, pero todavía no rebasa la referencia financiera exigida.'; return 'Sale positivo porque el ROI simple supera el WACC. En sencillo: después de cubrir el coste, queda rentabilidad por encima de la referencia financiera.'; }
+                  if (label === 'ROI') return 'Este ROI usa la lectura simple: retorno bruto menos coste, dividido entre coste. Es la forma más clara de saber si el escenario compensa económicamente.';
+                  if (label === 'Cartera positiva') return 'En esta beta hay una unidad evaluada. Aparece 100% si Customer Equity es positivo y 0% si no supera el WACC.';
                   if (label === 'Madurez ejecutiva') { if (maturity !== null && maturity < 3) return 'La madurez sale baja porque varias respuestas están en zona inicial o parcial. No es un juicio: señala dónde ordenar decisiones, datos y ejecución.'; if (maturity !== null && maturity < 4) return 'Hay una base ejecutiva razonable, pero todavía con capacidades a medio construir. El foco es convertir práctica en sistema.'; return 'La madurez directiva es sólida. El reto no es empezar, sino escalar, automatizar y medir impacto económico.'; }
                   return 'Lectura orientativa del indicador para explicar qué está empujando el resultado.';
                 }
                 function explainMetricCards(){ document.querySelectorAll('.metrics .card').forEach(function(card){ var title = card.querySelector('strong'); var value = card.querySelector('span'); if (!title || !value) return; var label = title.textContent.trim(); var comment = card.querySelector('.metricComment'); if (!comment) { comment = document.createElement('div'); comment.className = 'metricComment'; comment.style.cssText = 'margin-top:12px;padding:12px 13px;border-top:1px solid rgba(199,206,216,.72);border-radius:14px;background:#F6F7F9;color:#111827;font-size:13px;line-height:1.55;'; card.appendChild(comment); } comment.innerHTML = '<b style="display:block;color:#003B5C;margin-bottom:4px;">Lectura simple</b>' + explanationFor(label, value.textContent.trim()); }); }
                 function scrollToCabinet(){ var panel = document.querySelector('.panel.form'); if (!panel) return; var header = document.querySelector('.siteHeader'); var headerHeight = header ? header.offsetHeight : 0; var target = panel.getBoundingClientRect().top + window.scrollY - headerHeight - 18; window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' }); }
                 document.addEventListener('input', function(){ captureBusinessInputs(); }, true);
-                document.addEventListener('click', function(event){ var button = event.target && event.target.closest ? event.target.closest('.actions button') : null; if (!button || button.disabled) return; captureBusinessInputs(); setTimeout(scrollToCabinet, 90); setTimeout(scrollToCabinet, 260); setTimeout(function(){ convertCustomerEquityToMultiples(); transformFinancialCards(); buildCalculationBridge(); explainMetricCards(); preparePdfActions(); }, 500); setTimeout(function(){ convertCustomerEquityToMultiples(); transformFinancialCards(); buildCalculationBridge(); explainMetricCards(); preparePdfActions(); }, 1200); }, true);
+                document.addEventListener('click', function(event){ var button = event.target && event.target.closest ? event.target.closest('.actions button') : null; if (!button || button.disabled) return; captureBusinessInputs(); setTimeout(scrollToCabinet, 90); setTimeout(scrollToCabinet, 260); setTimeout(function(){ convertCustomerEquityToMultiples(); transformFinancialCards(); applySimpleFinancialModel(); explainMetricCards(); preparePdfActions(); }, 500); setTimeout(function(){ convertCustomerEquityToMultiples(); transformFinancialCards(); applySimpleFinancialModel(); explainMetricCards(); preparePdfActions(); }, 1200); }, true);
                 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
               })();
             `
