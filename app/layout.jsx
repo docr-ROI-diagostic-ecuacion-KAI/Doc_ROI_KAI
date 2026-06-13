@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
         <style>{`
           .siteHeader .navLinks a:not(.navCta){display:none!important}
           .vitamin .btn.primary{display:none!important}
-          .noPrint a.btn,.noPrint button.btn:not(:first-child){display:none!important}
+          .hero .noPrint a.btn,.hero .noPrint button.btn:not(:first-child){display:none!important}
           .actions button[disabled]{display:none!important}
           .calculationBridge{display:none!important}
           .pdfFinalDownload{margin:28px 0 4px;padding:24px;border:1px solid rgba(199,206,216,.86);border-radius:24px;background:#F6F7F9;text-align:center;color:#111827}.pdfFinalDownload strong{display:block;color:#0B0F19;font-size:20px;margin-bottom:8px}.pdfFinalDownload p{margin:0 auto 16px;max-width:680px;color:#6B7280;line-height:1.6}
