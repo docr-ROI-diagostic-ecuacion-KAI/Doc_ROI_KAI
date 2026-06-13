@@ -58,6 +58,14 @@ function tuneRadarCard() {
   if (intro) {
     intro.textContent = 'Vista directiva de las capacidades que alimentan el diagnostico. El objetivo no es leer una formula, sino identificar que palancas sostienen o frenan la creacion de Customer Equity.';
   }
+
+  const panels = card.querySelectorAll(':scope > div:not(.docroi-radar-summary) > div');
+  const quickReadPanel = panels?.[1];
+  const variableTable = quickReadPanel ? Array.from(quickReadPanel.children).find((child) => child.tagName === 'DIV') : null;
+  if (variableTable) {
+    variableTable.classList.add('docroi-radar-variable-table');
+    Array.from(variableTable.children).forEach((row) => row.classList.add('docroi-radar-variable-row'));
+  }
 }
 
 export default function RadarUxTuning() {
@@ -81,7 +89,7 @@ export default function RadarUxTuning() {
 
       .docroi-radar-premium > div:not(.docroi-radar-summary) {
         display: grid !important;
-        grid-template-columns: minmax(0, 1.12fr) minmax(250px, .88fr) !important;
+        grid-template-columns: minmax(0, 1.08fr) minmax(360px, .92fr) !important;
         gap: 20px !important;
         align-items: stretch !important;
       }
@@ -201,9 +209,53 @@ export default function RadarUxTuning() {
         font-size: 15px !important;
       }
 
-      .docroi-radar-premium > div:not(.docroi-radar-summary) > div:nth-child(2) b {
+      .docroi-radar-premium > div:not(.docroi-radar-summary) > div:nth-child(2) > p {
+        margin-bottom: 10px !important;
+      }
+
+      .docroi-radar-variable-table {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0 14px !important;
+        margin-top: 8px !important;
+        border-top: 1px solid rgba(199, 206, 216, .82) !important;
+      }
+
+      .docroi-radar-variable-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        gap: 8px !important;
+        align-items: center !important;
+        min-height: 44px !important;
+        padding: 9px 0 !important;
+        border-top: 0 !important;
+        border-bottom: 1px solid rgba(199, 206, 216, .72) !important;
+      }
+
+      .docroi-radar-variable-row span {
+        color: #111827 !important;
+        font-size: 12px !important;
+        font-weight: 800 !important;
+        line-height: 1.25 !important;
+      }
+
+      .docroi-radar-variable-row span span {
         color: #003b5c !important;
-        font-size: 12.5px !important;
+        display: inline !important;
+        font-size: 11.5px !important;
+        white-space: nowrap !important;
+      }
+
+      .docroi-radar-variable-row b {
+        align-self: center !important;
+        border: 1px solid rgba(0, 59, 92, .18) !important;
+        border-radius: 999px !important;
+        background: #ffffff !important;
+        color: #003b5c !important;
+        font-size: 11.5px !important;
+        font-weight: 900 !important;
+        padding: 4px 7px !important;
+        white-space: nowrap !important;
       }
 
       @media (max-width: 900px) {
@@ -214,7 +266,8 @@ export default function RadarUxTuning() {
         }
 
         .docroi-radar-summary,
-        .docroi-radar-premium > div:not(.docroi-radar-summary) {
+        .docroi-radar-premium > div:not(.docroi-radar-summary),
+        .docroi-radar-variable-table {
           grid-template-columns: 1fr !important;
         }
       }
@@ -226,12 +279,17 @@ export default function RadarUxTuning() {
         }
 
         .docroi-radar-premium > div:not(.docroi-radar-summary) {
-          grid-template-columns: 1.1fr .9fr !important;
+          grid-template-columns: 1.05fr .95fr !important;
           gap: 12px !important;
         }
 
         .docroi-radar-summary-card p {
           font-size: 10.5px !important;
+        }
+
+        .docroi-radar-variable-row {
+          min-height: 34px !important;
+          padding: 6px 0 !important;
         }
       }
     `}</style>
