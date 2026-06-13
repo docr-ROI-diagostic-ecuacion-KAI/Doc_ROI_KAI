@@ -15,6 +15,10 @@ export default function RootLayout({ children }) {
             __html: `
               (function normalizeDocRoiHeader(){
                 function run(){
+                  var links = document.querySelectorAll('.siteHeader .navLinks a');
+                  links.forEach(function(link){
+                    if (!link.classList.contains('navCta')) link.style.display = 'none';
+                  });
                   var cta = document.querySelector('.siteHeader .navCta');
                   if (!cta) return;
                   cta.textContent = 'Ecuación KAI';
