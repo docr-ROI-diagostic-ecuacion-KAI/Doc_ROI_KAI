@@ -35,13 +35,28 @@ function meaningFor(label) {
   return VARIABLE_MEANINGS[clean] || 'Capacidad evaluada por el diagnostico.';
 }
 
-function monetizationLevel(average) {
-  if (average === null) return 'Pendiente';
-  if (average < 2) return 'Inicial';
-  if (average < 3) return 'Emergente';
-  if (average < 4) return 'En desarrollo';
-  if (average < 4.6) return 'Avanzada';
-  return 'Optimizada';
+function monetizationPercent(average) {
+  return average === null ? null : Math.round((average / 5) * 100);
+}
+
+function monetizationReading(percent) {
+  if (percent === null) return { level: 'Pendiente', text: 'Faltan datos para convertir la lectura en porcentaje.' };
+  if (percent <= 25) {
+    return {
+      level: 'Mucho recorrido de mejora',
+      text: 'La empresa todavia tiene una capacidad baja para convertir dato, decision y ejecucion en valor monetizable.'
+    };
+  }
+  if (percent <= 75) {
+    return {
+      level: 'Buen camino',
+      text: 'Existe una base real para monetizar el dato, pero aun hay recorrido para ordenar, conectar y escalar las palancas.'
+    };
+  }
+  return {
+    level: 'Alta capacidad',
+    text: 'La organizacion muestra una posicion fuerte: conviene reconocer lo conseguido y avanzar con energia hacia escala y repeticion.'
+  };
 }
 
 function tuneRadarCard() {
@@ -118,13 +133,15 @@ function tuneRadarCard() {
     });
 
     if (!variableTable.querySelector('.docroi-radar-monetization-result')) {
+      const percent = monetizationPercent(average);
+      const reading = monetizationReading(percent);
       const result = document.createElement('div');
       result.className = 'docroi-radar-monetization-result';
       result.innerHTML = `
-        <span>Resultado ejecutivo</span>
-        <strong>Capacidad de monetizacion del dato</strong>
-        <b>${average === null ? 'Pendiente' : `${average.toFixed(1)}/5`}</b>
-        <p>Nivel ${monetizationLevel(average)}. Resume como la empresa convierte dato, decision, SPO y ejecucion en potencial de Customer Equity.</p>`;
+        <span>Grado de monetizacion total</span>
+        <strong>Monetizacion del dato</strong>
+        <b>${percent === null ? 'Pendiente' : `${percent}%`}</b>
+        <p>${reading.level}. ${reading.text}</p>`;
       variableTable.appendChild(result);
     }
   }
@@ -358,9 +375,9 @@ export default function RadarUxTuning() {
       .docroi-radar-monetization-result {
         grid-column: span 2 !important;
         min-height: 82px !important;
-        background: linear-gradient(135deg, #0b0f19 0%, #003b5c 100%) !important;
+        background: #000000 !important;
         border-color: rgba(29, 140, 255, .28) !important;
-        box-shadow: 0 14px 28px rgba(0, 59, 92, .18) !important;
+        box-shadow: 0 14px 28px rgba(0, 0, 0, .18) !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
@@ -385,7 +402,7 @@ export default function RadarUxTuning() {
         align-self: start !important;
         border-radius: 999px !important;
         background: #ffffff !important;
-        color: #003b5c !important;
+        color: #000000 !important;
         font-size: 13px !important;
         font-weight: 950 !important;
         padding: 5px 9px !important;
@@ -394,7 +411,7 @@ export default function RadarUxTuning() {
 
       .docroi-radar-monetization-result p {
         grid-column: 1 / -1 !important;
-        color: #d8ecf8 !important;
+        color: #f1f4f8 !important;
         font-size: 11px !important;
         font-weight: 650 !important;
         line-height: 1.35 !important;
