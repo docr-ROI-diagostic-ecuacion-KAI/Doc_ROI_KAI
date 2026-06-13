@@ -35,6 +35,15 @@ function meaningFor(label) {
   return VARIABLE_MEANINGS[clean] || 'Capacidad evaluada por el diagnostico.';
 }
 
+function monetizationLevel(average) {
+  if (average === null) return 'Pendiente';
+  if (average < 2) return 'Inicial';
+  if (average < 3) return 'Emergente';
+  if (average < 4) return 'En desarrollo';
+  if (average < 4.6) return 'Avanzada';
+  return 'Optimizada';
+}
+
 function tuneRadarCard() {
   const svg = document.querySelector('svg[aria-label="Radar de variables KAI ROI"]');
   if (!svg) return;
@@ -107,6 +116,17 @@ function tuneRadarCard() {
         row.appendChild(explanation);
       }
     });
+
+    if (!variableTable.querySelector('.docroi-radar-monetization-result')) {
+      const result = document.createElement('div');
+      result.className = 'docroi-radar-monetization-result';
+      result.innerHTML = `
+        <span>Resultado ejecutivo</span>
+        <strong>Capacidad de monetizacion del dato</strong>
+        <b>${average === null ? 'Pendiente' : `${average.toFixed(1)}/5`}</b>
+        <p>Nivel ${monetizationLevel(average)}. Resume como la empresa convierte dato, decision, SPO y ejecucion en potencial de Customer Equity.</p>`;
+      variableTable.appendChild(result);
+    }
   }
 }
 
@@ -284,7 +304,8 @@ export default function RadarUxTuning() {
         border-top: 0 !important;
       }
 
-      .docroi-radar-variable-row {
+      .docroi-radar-variable-row,
+      .docroi-radar-monetization-result {
         position: relative !important;
         display: grid !important;
         grid-template-columns: minmax(0, 1fr) auto !important;
@@ -334,6 +355,52 @@ export default function RadarUxTuning() {
         margin: 0 !important;
       }
 
+      .docroi-radar-monetization-result {
+        grid-column: span 2 !important;
+        min-height: 82px !important;
+        background: linear-gradient(135deg, #0b0f19 0%, #003b5c 100%) !important;
+        border-color: rgba(29, 140, 255, .28) !important;
+        box-shadow: 0 14px 28px rgba(0, 59, 92, .18) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .docroi-radar-monetization-result span {
+        color: #c7ced8 !important;
+        font-size: 10px !important;
+        font-weight: 900 !important;
+        letter-spacing: .08em !important;
+        text-transform: uppercase !important;
+      }
+
+      .docroi-radar-monetization-result strong {
+        color: #ffffff !important;
+        font-size: 14px !important;
+        font-weight: 950 !important;
+        line-height: 1.18 !important;
+      }
+
+      .docroi-radar-monetization-result b {
+        justify-self: end !important;
+        align-self: start !important;
+        border-radius: 999px !important;
+        background: #ffffff !important;
+        color: #003b5c !important;
+        font-size: 13px !important;
+        font-weight: 950 !important;
+        padding: 5px 9px !important;
+        white-space: nowrap !important;
+      }
+
+      .docroi-radar-monetization-result p {
+        grid-column: 1 / -1 !important;
+        color: #d8ecf8 !important;
+        font-size: 11px !important;
+        font-weight: 650 !important;
+        line-height: 1.35 !important;
+        margin: 0 !important;
+      }
+
       @media (max-width: 900px) {
         .docroi-radar-premium,
         .docroi-radar-premium > div:not(.docroi-radar-summary) > div:first-child,
@@ -354,6 +421,10 @@ export default function RadarUxTuning() {
       @media (max-width: 560px) {
         .docroi-radar-variable-table {
           grid-template-columns: 1fr !important;
+        }
+
+        .docroi-radar-monetization-result {
+          grid-column: span 1 !important;
         }
       }
 
@@ -420,7 +491,8 @@ export default function RadarUxTuning() {
           gap: 6px !important;
         }
 
-        .docroi-radar-variable-row {
+        .docroi-radar-variable-row,
+        .docroi-radar-monetization-result {
           min-height: 66px !important;
           padding: 7px !important;
         }
@@ -433,6 +505,20 @@ export default function RadarUxTuning() {
         .docroi-radar-variable-row p {
           font-size: 8.6px !important;
           line-height: 1.18 !important;
+        }
+
+        .docroi-radar-monetization-result strong {
+          font-size: 11px !important;
+        }
+
+        .docroi-radar-monetization-result b {
+          font-size: 10px !important;
+          padding: 3px 7px !important;
+        }
+
+        .docroi-radar-monetization-result p {
+          font-size: 8.8px !important;
+          line-height: 1.16 !important;
         }
       }
     `}</style>
