@@ -9,7 +9,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <style>{`.siteHeader .navLinks a:not(.navCta){display:none!important}.vitamin .btn.primary{display:none!important}`}</style>
+        <style>{`
+          .siteHeader .navLinks a:not(.navCta){display:none!important}
+          .vitamin .btn.primary{display:none!important}
+          .noPrint a.btn,.noPrint button.btn:not(:first-child){display:none!important}
+          .pdfFinalDownload{margin:28px 0 4px;padding:24px;border:1px solid rgba(199,206,216,.86);border-radius:24px;background:#F6F7F9;text-align:center;color:#111827}
+          .pdfFinalDownload strong{display:block;color:#0B0F19;font-size:20px;margin-bottom:8px}
+          .pdfFinalDownload p{margin:0 auto 16px;max-width:680px;color:#6B7280;line-height:1.6}
+          @media print{body{background:#fff!important}.page{background:#fff!important}.siteHeader,.siteFooter,.noPrint,.pdfFinalDownload{display:none!important}.hero{background:#000!important;color:#fff!important;border:0!important}.hero:before,.hero:after{display:none!important}.hero .wrap{padding:28px 22px!important}.hero .title{font-size:34px!important;line-height:1.08!important}.hero .lead{font-size:13px!important;line-height:1.5!important;color:#F3F4F6!important}.panel.result{border:0!important;box-shadow:none!important;padding:18px 0!important}.wrap{max-width:none!important;padding:18px 26px!important}.metrics{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}.card,.vitamin{break-inside:avoid!important;page-break-inside:avoid!important;box-shadow:none!important;border-color:#D1D5DB!important}.card span{font-size:22px!important}.metricComment{background:#fff!important}.result h2{font-size:22px!important;margin-top:22px!important}.vitamin p{font-size:12px!important;line-height:1.45!important}a{color:inherit!important;text-decoration:none!important}}
+        `}</style>
         {children}
         <script
           dangerouslySetInnerHTML={{
@@ -57,6 +65,7 @@ export default function RootLayout({ children }) {
                   convertCustomerEquityToMultiples();
                   transformFinancialCards();
                   explainMetricCards();
+                  preparePdfActions();
 
                   if (!prepared) {
                     prepared = true;
@@ -219,13 +228,36 @@ export default function RootLayout({ children }) {
                   }
                 }
 
+                function preparePdfActions(){
+                  var topActions = document.querySelector('.hero .actions.noPrint');
+                  if (topActions) {
+                    var buttons = topActions.querySelectorAll('.btn');
+                    buttons.forEach(function(button, index){
+                      if (index === 0) {
+                        button.innerHTML = 'Descargar diagnóstico en PDF';
+                        button.setAttribute('aria-label', 'Descargar diagnóstico en PDF');
+                      } else {
+                        button.style.display = 'none';
+                      }
+                    });
+                  }
+
+                  var panel = document.querySelector('.panel.result');
+                  if (!panel || panel.querySelector('.pdfFinalDownload')) return;
+                  var block = document.createElement('div');
+                  block.className = 'pdfFinalDownload noPrint';
+                  block.innerHTML = '<strong>Tu diagnóstico está listo</strong><p>Descarga una copia limpia del informe para revisarla con calma o compartirla internamente con tu equipo directivo.</p><button class="btn primary" type="button">Descargar diagnóstico en PDF</button>';
+                  var button = block.querySelector('button');
+                  button.addEventListener('click', function(){ window.print(); });
+                  panel.appendChild(block);
+                }
+
                 function explanationFor(label, rawValue){
                   var kai = readNumber(readMetric('Potencial de activacion'));
                   var data = readNumber(readMetric('Inteligencia de datos'));
                   var spo = readNumber(readMetric('Orquestacion cliente-oferta'));
                   var maturity = readNumber(readMetric('Madurez ejecutiva'));
                   var ce = rawValue && rawValue.indexOf('x') > -1 ? readNumber(rawValue) : null;
-                  var economics = calculateDeclaredEconomics();
 
                   if (label === 'Potencial de activacion') {
                     if (kai !== null && kai < 1) return 'Sale bajo porque KAI·ROI es multiplicativo: si una capacidad es débil, reduce todo el resultado. Suele venir de datos, SPO, productividad o cartera poco conectados.';
@@ -299,8 +331,8 @@ export default function RootLayout({ children }) {
                   captureBusinessInputs();
                   setTimeout(scrollToCabinet, 90);
                   setTimeout(scrollToCabinet, 260);
-                  setTimeout(function(){ convertCustomerEquityToMultiples(); transformFinancialCards(); explainMetricCards(); }, 500);
-                  setTimeout(function(){ convertCustomerEquityToMultiples(); transformFinancialCards(); explainMetricCards(); }, 1200);
+                  setTimeout(function(){ convertCustomerEquityToMultiples(); transformFinancialCards(); explainMetricCards(); preparePdfActions(); }, 500);
+                  setTimeout(function(){ convertCustomerEquityToMultiples(); transformFinancialCards(); explainMetricCards(); preparePdfActions(); }, 1200);
                 }, true);
 
                 if (document.readyState === 'loading') {
