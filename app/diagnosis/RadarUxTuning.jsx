@@ -44,18 +44,18 @@ function monetizationReading(percent) {
   if (percent <= 25) {
     return {
       level: 'Mucho recorrido de mejora',
-      text: 'La empresa todavia tiene una capacidad baja para convertir dato, decision y ejecucion en valor monetizable.'
+      text: 'Hay una base valiosa sobre la que trabajar. El siguiente paso es ordenar mejor dato, decision y ejecucion para convertirlos en valor monetizable.'
     };
   }
   if (percent <= 75) {
     return {
       level: 'Buen camino',
-      text: 'Existe una base real para monetizar el dato, pero aun hay recorrido para ordenar, conectar y escalar las palancas.'
+      text: 'La empresa ya tiene una base real para monetizar el dato. Con foco, conexion y metodo, este recorrido puede ganar mucha fuerza.'
     };
   }
   return {
     level: 'Alta capacidad',
-    text: 'La organizacion muestra una posicion fuerte: conviene reconocer lo conseguido y avanzar con energia hacia escala y repeticion.'
+    text: 'La organizacion muestra una posicion fuerte. Merece reconocimiento: ahora toca sostener, repetir y escalar esta capacidad con energia.'
   };
 }
 
@@ -138,8 +138,7 @@ function tuneRadarCard() {
       const result = document.createElement('div');
       result.className = 'docroi-radar-monetization-result';
       result.innerHTML = `
-        <span>Grado de monetizacion total</span>
-        <strong>Monetizacion del dato</strong>
+        <span>Grado de monetizacion del dato</span>
         <b>${percent === null ? 'Pendiente' : `${percent}%`}</b>
         <p>${reading.level}. ${reading.text}</p>`;
       variableTable.appendChild(result);
@@ -374,6 +373,8 @@ export default function RadarUxTuning() {
 
       .docroi-radar-monetization-result {
         grid-column: span 2 !important;
+        grid-template-columns: minmax(0, .78fr) minmax(128px, 1fr) !important;
+        grid-template-rows: auto 1fr auto !important;
         min-height: 82px !important;
         background: #000000 !important;
         border-color: rgba(29, 140, 255, .28) !important;
@@ -383,39 +384,45 @@ export default function RadarUxTuning() {
       }
 
       .docroi-radar-monetization-result span {
-        color: #c7ced8 !important;
-        font-size: 10px !important;
-        font-weight: 900 !important;
+        grid-column: 1 !important;
+        grid-row: 1 / 3 !important;
+        align-self: start !important;
+        color: #ffffff !important;
+        font-size: 11px !important;
+        font-weight: 950 !important;
         letter-spacing: .08em !important;
+        line-height: 1.18 !important;
         text-transform: uppercase !important;
       }
 
       .docroi-radar-monetization-result strong {
-        color: #ffffff !important;
-        font-size: 14px !important;
-        font-weight: 950 !important;
-        line-height: 1.18 !important;
+        display: none !important;
       }
 
       .docroi-radar-monetization-result b {
-        justify-self: end !important;
-        align-self: start !important;
-        border-radius: 999px !important;
-        background: #ffffff !important;
-        color: #000000 !important;
-        font-size: 13px !important;
+        grid-column: 2 !important;
+        grid-row: 1 / 3 !important;
+        justify-self: stretch !important;
+        align-self: center !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        color: #ffffff !important;
+        font-size: clamp(34px, 5.4vw, 58px) !important;
         font-weight: 950 !important;
-        padding: 5px 9px !important;
+        line-height: .88 !important;
+        padding: 0 !important;
+        text-align: right !important;
         white-space: nowrap !important;
       }
 
       .docroi-radar-monetization-result p {
         grid-column: 1 / -1 !important;
+        grid-row: 3 !important;
         color: #f1f4f8 !important;
         font-size: 11px !important;
-        font-weight: 650 !important;
-        line-height: 1.35 !important;
-        margin: 0 !important;
+        font-weight: 700 !important;
+        line-height: 1.32 !important;
+        margin: 2px 0 0 !important;
       }
 
       @media (max-width: 900px) {
@@ -524,13 +531,13 @@ export default function RadarUxTuning() {
           line-height: 1.18 !important;
         }
 
-        .docroi-radar-monetization-result strong {
-          font-size: 11px !important;
+        .docroi-radar-monetization-result span {
+          font-size: 8.8px !important;
         }
 
         .docroi-radar-monetization-result b {
-          font-size: 10px !important;
-          padding: 3px 7px !important;
+          font-size: 30px !important;
+          line-height: .9 !important;
         }
 
         .docroi-radar-monetization-result p {
