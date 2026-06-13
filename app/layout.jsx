@@ -28,6 +28,38 @@ export default function RootLayout({ children }) {
                   run();
                 }
               })();
+
+              (function prepareDiagnosisSession(){
+                if (!location.pathname || !location.pathname.startsWith('/diagnosis')) return;
+                try {
+                  sessionStorage.removeItem('docroi-kai-diagnosis');
+                  localStorage.removeItem('docroi-kai-diagnosis');
+                } catch (e) {}
+
+                var prepared = false;
+                function run(){
+                  document.querySelectorAll('.field input').forEach(function(input){
+                    input.setAttribute('autocomplete', 'off');
+                  });
+
+                  var consent = document.querySelector('.field.consent input[type="checkbox"]');
+                  if (consent && !consent.checked) {
+                    consent.click();
+                  }
+
+                  if (!prepared) {
+                    prepared = true;
+                    setTimeout(run, 250);
+                    setTimeout(run, 900);
+                  }
+                }
+
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', run);
+                } else {
+                  run();
+                }
+              })();
             `
           }}
         />
