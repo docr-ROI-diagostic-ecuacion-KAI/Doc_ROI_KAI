@@ -2,6 +2,19 @@
 
 import { useEffect } from 'react';
 
+const VARIABLE_MEANINGS = {
+  inteligencia: 'Criterio aplicado a la decision.',
+  estructura: 'Input estructural del modelo.',
+  'factor operativo': 'Capacidad de activar informacion.',
+  'dato + ia': 'Dato util para decidir.',
+  cliente: 'Lectura de comportamiento cliente.',
+  oferta: 'Rentabilidad e impacto de oferta.',
+  satisfaccion: 'Senal de experiencia y lealtad.',
+  spo: 'Orquestacion cliente-oferta.',
+  productividad: 'Eficiencia de ejecucion.',
+  cartera: 'Salud y contexto temporal.'
+};
+
 function readRadarValues(svg) {
   const values = Array.from(svg.querySelectorAll('g text'))
     .map((node) => Number(node.textContent || 0))
@@ -12,6 +25,14 @@ function readRadarValues(svg) {
   const average = values.reduce((sum, value) => sum + value, 0) / values.length;
   const lowest = Math.min(...values);
   return { average, lowest };
+}
+
+function meaningFor(label) {
+  const clean = String(label || '')
+    .replace(/\([^)]*\)/g, '')
+    .trim()
+    .toLowerCase();
+  return VARIABLE_MEANINGS[clean] || 'Capacidad evaluada por el diagnostico.';
 }
 
 function tuneRadarCard() {
@@ -77,7 +98,15 @@ function tuneRadarCard() {
   const variableTable = quickReadPanel ? Array.from(quickReadPanel.children).find((child) => child.tagName === 'DIV') : null;
   if (variableTable) {
     variableTable.classList.add('docroi-radar-variable-table');
-    Array.from(variableTable.children).forEach((row) => row.classList.add('docroi-radar-variable-row'));
+    Array.from(variableTable.children).forEach((row) => {
+      row.classList.add('docroi-radar-variable-row');
+      const label = row.querySelector('span');
+      if (label && !row.querySelector('p')) {
+        const explanation = document.createElement('p');
+        explanation.textContent = meaningFor(label.textContent);
+        row.appendChild(explanation);
+      }
+    });
   }
 }
 
@@ -123,7 +152,7 @@ export default function RadarUxTuning() {
 
       .docroi-radar-premium > div:not(.docroi-radar-summary) {
         display: grid !important;
-        grid-template-columns: minmax(0, 1.08fr) minmax(360px, .92fr) !important;
+        grid-template-columns: minmax(0, 1.02fr) minmax(420px, .98fr) !important;
         gap: 20px !important;
         align-items: stretch !important;
       }
@@ -249,47 +278,60 @@ export default function RadarUxTuning() {
 
       .docroi-radar-variable-table {
         display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 0 14px !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 8px !important;
         margin-top: 8px !important;
-        border-top: 1px solid rgba(199, 206, 216, .82) !important;
+        border-top: 0 !important;
       }
 
       .docroi-radar-variable-row {
+        position: relative !important;
         display: grid !important;
         grid-template-columns: minmax(0, 1fr) auto !important;
-        gap: 8px !important;
-        align-items: center !important;
-        min-height: 44px !important;
-        padding: 9px 0 !important;
-        border-top: 0 !important;
-        border-bottom: 1px solid rgba(199, 206, 216, .72) !important;
+        grid-template-rows: auto auto !important;
+        gap: 4px 8px !important;
+        align-items: start !important;
+        min-height: 82px !important;
+        padding: 10px !important;
+        border: 1px solid rgba(199, 206, 216, .78) !important;
+        border-radius: 12px !important;
+        background: #ffffff !important;
+        box-shadow: 0 8px 18px rgba(11, 15, 25, .035) !important;
       }
 
       .docroi-radar-variable-row span {
         color: #111827 !important;
-        font-size: 12px !important;
-        font-weight: 800 !important;
-        line-height: 1.25 !important;
+        font-size: 11.2px !important;
+        font-weight: 900 !important;
+        line-height: 1.2 !important;
       }
 
       .docroi-radar-variable-row span span {
         color: #003b5c !important;
         display: inline !important;
-        font-size: 11.5px !important;
+        font-size: 10.8px !important;
         white-space: nowrap !important;
       }
 
       .docroi-radar-variable-row b {
-        align-self: center !important;
+        align-self: start !important;
         border: 1px solid rgba(0, 59, 92, .18) !important;
         border-radius: 999px !important;
-        background: #ffffff !important;
+        background: #d8ecf8 !important;
         color: #003b5c !important;
-        font-size: 11.5px !important;
+        font-size: 11px !important;
         font-weight: 900 !important;
-        padding: 4px 7px !important;
+        padding: 3px 7px !important;
         white-space: nowrap !important;
+      }
+
+      .docroi-radar-variable-row p {
+        grid-column: 1 / -1 !important;
+        color: #4b5563 !important;
+        font-size: 10.5px !important;
+        font-weight: 650 !important;
+        line-height: 1.28 !important;
+        margin: 0 !important;
       }
 
       @media (max-width: 900px) {
@@ -300,7 +342,16 @@ export default function RadarUxTuning() {
         }
 
         .docroi-radar-summary,
-        .docroi-radar-premium > div:not(.docroi-radar-summary),
+        .docroi-radar-premium > div:not(.docroi-radar-summary) {
+          grid-template-columns: 1fr !important;
+        }
+
+        .docroi-radar-variable-table {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+      }
+
+      @media (max-width: 560px) {
         .docroi-radar-variable-table {
           grid-template-columns: 1fr !important;
         }
@@ -356,7 +407,7 @@ export default function RadarUxTuning() {
         }
 
         .docroi-radar-premium > div:not(.docroi-radar-summary) {
-          grid-template-columns: 1.05fr .95fr !important;
+          grid-template-columns: 1.02fr .98fr !important;
           gap: 12px !important;
         }
 
@@ -364,9 +415,24 @@ export default function RadarUxTuning() {
           font-size: 10.5px !important;
         }
 
+        .docroi-radar-variable-table {
+          grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+          gap: 6px !important;
+        }
+
         .docroi-radar-variable-row {
-          min-height: 34px !important;
-          padding: 6px 0 !important;
+          min-height: 66px !important;
+          padding: 7px !important;
+        }
+
+        .docroi-radar-variable-row span,
+        .docroi-radar-variable-row b {
+          font-size: 9.5px !important;
+        }
+
+        .docroi-radar-variable-row p {
+          font-size: 8.6px !important;
+          line-height: 1.18 !important;
         }
       }
     `}</style>
