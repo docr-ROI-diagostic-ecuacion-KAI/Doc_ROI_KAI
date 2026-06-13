@@ -68,7 +68,16 @@ export default function RootLayout({ children }) {
 
                 function readNumber(text){
                   if (!text) return null;
-                  var cleaned = String(text).replace(/[^0-9,.-]/g, '').replace(/\./g, '').replace(',', '.');
+                  var raw = String(text).trim().replace(/[−–—]/g, '-');
+                  var cleaned = raw.replace(/[^0-9,.-]/g, '');
+                  if (!cleaned) return null;
+                  var hasComma = cleaned.indexOf(',') > -1;
+                  var hasDot = cleaned.indexOf('.') > -1;
+                  if (hasComma && hasDot) {
+                    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+                  } else if (hasComma) {
+                    cleaned = cleaned.replace(',', '.');
+                  }
                   var n = Number(cleaned);
                   return Number.isFinite(n) ? n : null;
                 }
@@ -93,13 +102,13 @@ export default function RootLayout({ children }) {
                     if (label !== 'Customer Equity' && label !== 'Customer Equity empresa') return;
                     var raw = value.textContent.trim();
                     if (!raw || raw.indexOf('%') === -1) return;
-                    var percent = Number(raw.replace('%', '').replace('.', '').replace(',', '.'));
+                    var percent = readNumber(raw);
                     if (!Number.isFinite(percent)) return;
                     value.textContent = formatMultiple(percent / 100);
                     if (label === 'Customer Equity' && note) {
-                      note.textContent = 'Veces que el ROI estimado queda por encima del WACC. Ejemplo: 3,5x significa 3,5 veces sobre la referencia financiera.';
+                      note.textContent = percent < 0 ? 'Veces que el ROI estimado queda por debajo del WACC. Un valor negativo indica que el escenario todavia no crea Customer Equity.' : 'Veces que el ROI estimado queda por encima del WACC. Ejemplo: 3,5x significa 3,5 veces sobre la referencia financiera.';
                     } else if (note) {
-                      note.textContent = 'Suma ejecutiva de unidades evaluadas, expresada como veces sobre WACC en esta version del diagnostico.';
+                      note.textContent = percent < 0 ? 'Suma ejecutiva negativa de las unidades evaluadas: el escenario todavia no supera la referencia financiera.' : 'Suma ejecutiva de unidades evaluadas, expresada como veces sobre WACC en esta version del diagnostico.';
                     }
                   });
                 }
@@ -108,6 +117,7 @@ export default function RootLayout({ children }) {
                   var kai = readNumber(readMetric('Potencial de activacion'));
                   var data = readNumber(readMetric('Inteligencia de datos'));
                   var spo = readNumber(readMetric('Orquestacion cliente-oferta'));
+                  var md = readNumber(readMetric('Margen diagnosticado'));
                   var maturity = readNumber(readMetric('Madurez ejecutiva'));
                   var ce = rawValue && rawValue.indexOf('x') > -1 ? readNumber(rawValue) : null;
 
@@ -117,7 +127,7 @@ export default function RootLayout({ children }) {
                     return 'El sistema muestra buena capacidad de activación: las respuestas indican que la organización ya conecta mejor decisión, datos y ejecución.';
                   }
                   if (label === 'Inteligencia de datos') {
-                    if (data !== null && data < 60) return 'El dato todavía no está ayudando lo suficiente a decidir. La causa suele ser información dispersa, poco normalizada o no conectada con acciones comerciales.';
+                    if (data !== null && data <= 60) return 'El dato todavía ayuda solo de forma parcial. Hay señales útiles, pero aún falta convertirlas en decisiones repetibles, priorización y acciones comerciales conectadas.';
                     return 'El dato ya empieza a trabajar para la dirección. La oportunidad está en automatizarlo y llevarlo a decisiones repetibles.';
                   }
                   if (label === 'Orquestacion cliente-oferta') {
@@ -128,16 +138,17 @@ export default function RootLayout({ children }) {
                     return 'Este importe viene de lo declarado como ingresos/margen potencial y eficiencia capturable. No es promesa: es la base económica sobre la que la fórmula calcula valor activable.';
                   }
                   if (label === 'Customer Equity') {
-                    if (ce !== null && ce < 0) return 'Sale negativo porque el ROI estimado no supera el WACC. En sencillo: el valor activado no compensa todavía el coste y la referencia financiera exigida.';
+                    if (ce !== null && ce < 0) return 'Sale negativo porque el valor activado por la fórmula es muy pequeño frente al coste y no llega a superar el WACC. En este caso pesan especialmente un KAI activable bajo, SPO débil y una madurez ejecutiva todavía parcial.';
                     if (ce !== null && ce < 1) return 'Es positivo, pero todavía bajo: el ROI supera el WACC, aunque con poco margen. La mejora suele venir de subir KAI, aumentar margen capturable o controlar coste.';
                     if (ce !== null && ce < 3) return 'El resultado ya supera la referencia financiera. Probablemente ayudan un coste razonable, un WACC no demasiado exigente y margen activable suficiente.';
                     return 'Resultado fuerte: el ROI estimado queda varias veces por encima del WACC. Suele explicarse por alto margen activable, coste controlado y una cadena KAI suficientemente conectada.';
                   }
                   if (label === 'Customer Equity empresa') {
+                    if (ce !== null && ce < 0) return 'Como esta beta evalúa una unidad principal, la lectura de empresa replica ese Customer Equity negativo. Al añadir clientes o segmentos, este dato mostrará qué partes de la cartera crean valor y cuáles lo destruyen.';
                     return 'Resume el Customer Equity de las unidades evaluadas. En esta beta hay una unidad principal; cuando añadamos clientes o segmentos, aquí se verá la suma real de cartera.';
                   }
                   if (label === 'Cartera positiva') {
-                    return 'Indica qué parte de la cartera evaluada crea Customer Equity positivo. En esta beta se evalúa una unidad; después podrá leerse por cliente, segmento o línea de negocio.';
+                    return 'Indica qué parte de la cartera evaluada crea Customer Equity positivo. Aquí aparece 0% porque la unidad analizada no supera todavía la referencia financiera.';
                   }
                   if (label === 'Madurez ejecutiva') {
                     if (maturity !== null && maturity < 3) return 'La madurez sale baja porque varias respuestas están en zona inicial o parcial. No es un juicio: señala dónde ordenar decisiones, datos y ejecución.';
