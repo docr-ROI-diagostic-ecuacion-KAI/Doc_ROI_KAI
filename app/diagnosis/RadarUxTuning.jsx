@@ -24,6 +24,19 @@ function tuneRadarCard() {
   card.dataset.docroiRadarTuned = 'true';
   card.classList.add('docroi-radar-premium');
 
+  const resultPanel = document.querySelector('.panel.result');
+  if (resultPanel && !resultPanel.querySelector('.docroi-print-report-header')) {
+    const printHeader = document.createElement('div');
+    printHeader.className = 'docroi-print-report-header';
+    printHeader.innerHTML = `
+      <img src="https://docroi.marketing/wp-content/uploads/2026/05/Logo_Negro_DoC_ROI.jpg" alt="Doc ROI" />
+      <div>
+        <strong>Diagnostico KAI·ROI</strong>
+        <span>Informe ejecutivo de Customer Equity</span>
+      </div>`;
+    resultPanel.insertBefore(printHeader, resultPanel.firstChild);
+  }
+
   const { average, lowest } = readRadarValues(svg);
   const summary = document.createElement('div');
   summary.className = 'docroi-radar-summary';
@@ -78,6 +91,10 @@ export default function RadarUxTuning() {
 
   return (
     <style jsx global>{`
+      .docroi-print-report-header {
+        display: none !important;
+      }
+
       .docroi-radar-premium {
         border: 1px solid rgba(199, 206, 216, .9) !important;
         border-radius: 18px !important;
@@ -273,6 +290,49 @@ export default function RadarUxTuning() {
       }
 
       @media print {
+        .docroi-print-report-header {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 18px !important;
+          background: #000000 !important;
+          color: #ffffff !important;
+          border-radius: 14px !important;
+          padding: 14px 18px !important;
+          margin: 0 0 16px !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          break-inside: avoid !important;
+        }
+
+        .docroi-print-report-header img {
+          display: block !important;
+          width: auto !important;
+          height: 42px !important;
+          object-fit: contain !important;
+        }
+
+        .docroi-print-report-header div {
+          text-align: right !important;
+        }
+
+        .docroi-print-report-header strong {
+          display: block !important;
+          color: #ffffff !important;
+          font-size: 14px !important;
+          font-weight: 900 !important;
+          line-height: 1.25 !important;
+        }
+
+        .docroi-print-report-header span {
+          display: block !important;
+          color: #c7ced8 !important;
+          font-size: 11px !important;
+          font-weight: 700 !important;
+          line-height: 1.35 !important;
+          margin-top: 2px !important;
+        }
+
         .docroi-radar-premium {
           box-shadow: none !important;
           padding: 14px !important;
