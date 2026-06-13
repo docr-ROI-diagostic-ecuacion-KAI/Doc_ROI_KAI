@@ -373,9 +373,10 @@ export default function RadarUxTuning() {
 
       .docroi-radar-monetization-result {
         grid-column: span 2 !important;
-        grid-template-columns: minmax(0, .78fr) minmax(128px, 1fr) !important;
+        grid-template-columns: minmax(0, .62fr) minmax(160px, 1.38fr) !important;
         grid-template-rows: auto 1fr auto !important;
-        min-height: 82px !important;
+        min-height: 104px !important;
+        padding: 12px 14px !important;
         background: #000000 !important;
         border-color: rgba(29, 140, 255, .28) !important;
         box-shadow: 0 14px 28px rgba(0, 0, 0, .18) !important;
@@ -388,9 +389,9 @@ export default function RadarUxTuning() {
         grid-row: 1 / 3 !important;
         align-self: start !important;
         color: #ffffff !important;
-        font-size: 11px !important;
+        font-size: 12px !important;
         font-weight: 950 !important;
-        letter-spacing: .08em !important;
+        letter-spacing: .07em !important;
         line-height: 1.18 !important;
         text-transform: uppercase !important;
       }
@@ -407,9 +408,10 @@ export default function RadarUxTuning() {
         border-radius: 0 !important;
         background: transparent !important;
         color: #ffffff !important;
-        font-size: clamp(34px, 5.4vw, 58px) !important;
+        font-size: clamp(66px, 9.6vw, 108px) !important;
         font-weight: 950 !important;
-        line-height: .88 !important;
+        letter-spacing: -0.02em !important;
+        line-height: .78 !important;
         padding: 0 !important;
         text-align: right !important;
         white-space: nowrap !important;
@@ -421,7 +423,7 @@ export default function RadarUxTuning() {
         color: #f1f4f8 !important;
         font-size: 11px !important;
         font-weight: 700 !important;
-        line-height: 1.32 !important;
+        line-height: 1.28 !important;
         margin: 2px 0 0 !important;
       }
 
@@ -449,6 +451,18 @@ export default function RadarUxTuning() {
 
         .docroi-radar-monetization-result {
           grid-column: span 1 !important;
+          grid-template-columns: 1fr !important;
+        }
+
+        .docroi-radar-monetization-result b {
+          grid-column: 1 !important;
+          grid-row: 2 !important;
+          text-align: left !important;
+        }
+
+        .docroi-radar-monetization-result span {
+          grid-column: 1 !important;
+          grid-row: 1 !important;
         }
       }
 
@@ -515,10 +529,14 @@ export default function RadarUxTuning() {
           gap: 6px !important;
         }
 
-        .docroi-radar-variable-row,
-        .docroi-radar-monetization-result {
+        .docroi-radar-variable-row {
           min-height: 66px !important;
           padding: 7px !important;
+        }
+
+        .docroi-radar-monetization-result {
+          min-height: 82px !important;
+          padding: 8px !important;
         }
 
         .docroi-radar-variable-row span,
@@ -536,8 +554,8 @@ export default function RadarUxTuning() {
         }
 
         .docroi-radar-monetization-result b {
-          font-size: 30px !important;
-          line-height: .9 !important;
+          font-size: 44px !important;
+          line-height: .82 !important;
         }
 
         .docroi-radar-monetization-result p {
