@@ -9,7 +9,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <style>{`.siteHeader .navLinks a:not(.navCta){display:none!important;}`}</style>
+        <style>{`.siteHeader .navLinks a:not(.navCta){display:none!important}.vitamin .btn.primary{display:none!important}`}</style>
         {children}
         <script
           dangerouslySetInnerHTML={{
@@ -46,12 +46,16 @@ export default function RootLayout({ children }) {
                     if (input.getAttribute('autocomplete') !== 'off') input.setAttribute('autocomplete', 'off');
                   });
 
+                  applyPositiveEconomicExamples();
+                  captureBusinessInputs();
+
                   var consent = document.querySelector('.field.consent input[type="checkbox"]');
                   if (consent && !consent.checked) {
                     consent.click();
                   }
 
                   convertCustomerEquityToMultiples();
+                  transformFinancialCards();
                   explainMetricCards();
 
                   if (!prepared) {
@@ -64,6 +68,11 @@ export default function RootLayout({ children }) {
                 function formatMultiple(value){
                   if (!Number.isFinite(value)) return 'no calculable';
                   return new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(value) + 'x';
+                }
+
+                function formatPercent(value, decimals){
+                  if (!Number.isFinite(value)) return 'no calculable';
+                  return new Intl.NumberFormat('es-ES', { minimumFractionDigits: decimals || 1, maximumFractionDigits: decimals || 1 }).format(value * 100) + '%';
                 }
 
                 function readNumber(text){
@@ -82,6 +91,11 @@ export default function RootLayout({ children }) {
                   return Number.isFinite(n) ? n : null;
                 }
 
+                function rateFromPercentText(text){
+                  var n = readNumber(text);
+                  return n === null ? null : n / 100;
+                }
+
                 function readMetric(label){
                   var found = null;
                   document.querySelectorAll('.metrics .card').forEach(function(card){
@@ -90,6 +104,72 @@ export default function RootLayout({ children }) {
                     if (title && value && title.textContent.trim() === label) found = value.textContent.trim();
                   });
                   return found;
+                }
+
+                function cardByTitle(label){
+                  var found = null;
+                  document.querySelectorAll('.metrics .card').forEach(function(card){
+                    var title = card.querySelector('strong');
+                    if (title && title.textContent.trim() === label) found = card;
+                  });
+                  return found;
+                }
+
+                function applyPositiveEconomicExamples(){
+                  var examples = [
+                    ['Ingresos o margen potencial estimado', '500.000'],
+                    ['Porcentaje estimado que podria capturarse', '70'],
+                    ['Eficiencia economica potencial', '150.000'],
+                    ['Porcentaje estimado de eficiencia capturable', '60'],
+                    ['Coste atribuible de la iniciativa', '8.000'],
+                    ['Coste de capital o referencia financiera', '12']
+                  ];
+                  document.querySelectorAll('.field label').forEach(function(label){
+                    var input = label.querySelector('input');
+                    if (!input) return;
+                    var text = label.textContent || '';
+                    examples.forEach(function(item){
+                      if (text.indexOf(item[0]) > -1 && input.getAttribute('placeholder') !== item[1]) input.setAttribute('placeholder', item[1]);
+                    });
+                  });
+                }
+
+                function captureBusinessInputs(){
+                  var data = {};
+                  var map = [
+                    ['Ingresos o margen potencial estimado', 'I'],
+                    ['Porcentaje estimado que podria capturarse', 'R'],
+                    ['Eficiencia economica potencial', 'E'],
+                    ['Porcentaje estimado de eficiencia capturable', 'Q'],
+                    ['Coste atribuible de la iniciativa', 'C'],
+                    ['Coste de capital o referencia financiera', 'WACC']
+                  ];
+                  document.querySelectorAll('.field label').forEach(function(label){
+                    var input = label.querySelector('input');
+                    if (!input) return;
+                    var text = label.textContent || '';
+                    map.forEach(function(item){
+                      if (text.indexOf(item[0]) > -1 && input.value) data[item[1]] = input.value;
+                    });
+                  });
+                  if (Object.keys(data).length) {
+                    try { sessionStorage.setItem('docroi-kai-business-inputs', JSON.stringify(data)); } catch (e) {}
+                  }
+                }
+
+                function getBusinessInputs(){
+                  try { return JSON.parse(sessionStorage.getItem('docroi-kai-business-inputs') || '{}'); } catch (e) { return {}; }
+                }
+
+                function calculateDeclaredEconomics(){
+                  var data = getBusinessInputs();
+                  var I = readNumber(data.I);
+                  var R = rateFromPercentText(data.R);
+                  var E = readNumber(data.E);
+                  var Q = rateFromPercentText(data.Q);
+                  var WACC = rateFromPercentText(data.WACC);
+                  var md = I !== null && R !== null && E !== null && Q !== null ? (I * R + E * Q) : null;
+                  return { I: I, R: R, E: E, Q: Q, WACC: WACC, MD: md, marginRate: I && md !== null ? md / I : null };
                 }
 
                 function convertCustomerEquityToMultiples(){
@@ -113,13 +193,39 @@ export default function RootLayout({ children }) {
                   });
                 }
 
+                function transformFinancialCards(){
+                  var economics = calculateDeclaredEconomics();
+                  var marginCard = cardByTitle('Margen diagnosticado');
+                  if (marginCard) {
+                    var marginValue = marginCard.querySelector('span');
+                    var marginNote = marginCard.querySelector('p.small');
+                    if (marginValue && economics.marginRate !== null) marginValue.textContent = formatPercent(economics.marginRate, 1);
+                    if (marginNote) marginNote.textContent = 'Margen capturable estimado sobre la base economica declarada. Ayuda a entender que parte del potencial podria convertirse en valor.';
+                  }
+
+                  var roiCard = cardByTitle('Customer Equity empresa');
+                  var ceText = readMetric('Customer Equity');
+                  var ceMultiple = ceText && ceText.indexOf('x') > -1 ? readNumber(ceText) : null;
+                  if (roiCard) {
+                    var title = roiCard.querySelector('strong');
+                    var value = roiCard.querySelector('span');
+                    var note = roiCard.querySelector('p.small');
+                    if (title) title.textContent = 'ROI';
+                    if (value) {
+                      var roi = ceMultiple !== null && economics.WACC !== null ? economics.WACC * (ceMultiple + 1) : null;
+                      value.textContent = roi !== null ? formatPercent(roi, 1) : 'no calculable';
+                    }
+                    if (note) note.textContent = 'Retorno estimado del escenario antes de compararlo con el WACC. Si ROI supera WACC, empieza a crear Customer Equity.';
+                  }
+                }
+
                 function explanationFor(label, rawValue){
                   var kai = readNumber(readMetric('Potencial de activacion'));
                   var data = readNumber(readMetric('Inteligencia de datos'));
                   var spo = readNumber(readMetric('Orquestacion cliente-oferta'));
-                  var md = readNumber(readMetric('Margen diagnosticado'));
                   var maturity = readNumber(readMetric('Madurez ejecutiva'));
                   var ce = rawValue && rawValue.indexOf('x') > -1 ? readNumber(rawValue) : null;
+                  var economics = calculateDeclaredEconomics();
 
                   if (label === 'Potencial de activacion') {
                     if (kai !== null && kai < 1) return 'Sale bajo porque KAI·ROI es multiplicativo: si una capacidad es débil, reduce todo el resultado. Suele venir de datos, SPO, productividad o cartera poco conectados.';
@@ -135,20 +241,19 @@ export default function RootLayout({ children }) {
                     return 'Clientes, oferta y satisfacción están razonablemente conectados. El siguiente paso es usarlo para priorizar cartera y acciones.';
                   }
                   if (label === 'Margen diagnosticado') {
-                    return 'Este importe viene de lo declarado como ingresos/margen potencial y eficiencia capturable. No es promesa: es la base económica sobre la que la fórmula calcula valor activable.';
+                    return 'Este porcentaje sale de dividir el margen capturable estimado entre la base economica declarada. Sube si aumenta el potencial capturable o la eficiencia, y baja si el potencial realista es menor.';
                   }
                   if (label === 'Customer Equity') {
-                    if (ce !== null && ce < 0) return 'Sale negativo porque el valor activado por la fórmula es muy pequeño frente al coste y no llega a superar el WACC. En este caso pesan especialmente un KAI activable bajo, SPO débil y una madurez ejecutiva todavía parcial.';
+                    if (ce !== null && ce < 0) return 'Sale negativo porque el ROI estimado no supera el WACC. Para subirlo hay cuatro palancas: mejorar KAI, fortalecer SPO, aumentar margen capturable o reducir el coste atribuible.';
                     if (ce !== null && ce < 1) return 'Es positivo, pero todavía bajo: el ROI supera el WACC, aunque con poco margen. La mejora suele venir de subir KAI, aumentar margen capturable o controlar coste.';
                     if (ce !== null && ce < 3) return 'El resultado ya supera la referencia financiera. Probablemente ayudan un coste razonable, un WACC no demasiado exigente y margen activable suficiente.';
                     return 'Resultado fuerte: el ROI estimado queda varias veces por encima del WACC. Suele explicarse por alto margen activable, coste controlado y una cadena KAI suficientemente conectada.';
                   }
-                  if (label === 'Customer Equity empresa') {
-                    if (ce !== null && ce < 0) return 'Como esta beta evalúa una unidad principal, la lectura de empresa replica ese Customer Equity negativo. Al añadir clientes o segmentos, este dato mostrará qué partes de la cartera crean valor y cuáles lo destruyen.';
-                    return 'Resume el Customer Equity de las unidades evaluadas. En esta beta hay una unidad principal; cuando añadamos clientes o segmentos, aquí se verá la suma real de cartera.';
+                  if (label === 'ROI') {
+                    return 'Este es el retorno estimado del escenario. Para crear Customer Equity debe ser mayor que el WACC declarado; si queda por debajo, el proyecto puede mover actividad pero no crear valor financiero suficiente.';
                   }
                   if (label === 'Cartera positiva') {
-                    return 'Indica qué parte de la cartera evaluada crea Customer Equity positivo. Aquí aparece 0% porque la unidad analizada no supera todavía la referencia financiera.';
+                    return 'Sube cuando las unidades, clientes o segmentos analizados tienen Customer Equity mayor que cero. En sencillo: ROI debe superar WACC. En esta beta solo hay una unidad; por eso puede aparecer 0% o 100%.';
                   }
                   if (label === 'Madurez ejecutiva') {
                     if (maturity !== null && maturity < 3) return 'La madurez sale baja porque varias respuestas están en zona inicial o parcial. No es un juicio: señala dónde ordenar decisiones, datos y ejecución.';
@@ -184,13 +289,18 @@ export default function RootLayout({ children }) {
                   window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
                 }
 
+                document.addEventListener('input', function(){
+                  captureBusinessInputs();
+                }, true);
+
                 document.addEventListener('click', function(event){
                   var button = event.target && event.target.closest ? event.target.closest('.actions button') : null;
                   if (!button || button.disabled) return;
+                  captureBusinessInputs();
                   setTimeout(scrollToCabinet, 90);
                   setTimeout(scrollToCabinet, 260);
-                  setTimeout(function(){ convertCustomerEquityToMultiples(); explainMetricCards(); }, 500);
-                  setTimeout(function(){ convertCustomerEquityToMultiples(); explainMetricCards(); }, 1200);
+                  setTimeout(function(){ convertCustomerEquityToMultiples(); transformFinancialCards(); explainMetricCards(); }, 500);
+                  setTimeout(function(){ convertCustomerEquityToMultiples(); transformFinancialCards(); explainMetricCards(); }, 1200);
                 }, true);
 
                 if (document.readyState === 'loading') {
