@@ -95,6 +95,23 @@ export default function RadarUxTuning() {
         display: none !important;
       }
 
+      .visual {
+        background-image: linear-gradient(90deg, rgba(11, 15, 25, .12), rgba(0, 59, 92, .18)), url('https://docroi.marketing/wp-content/uploads/2026/05/Imagen2.png') !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        border: 1px solid rgba(199, 206, 216, .42) !important;
+        box-shadow: 0 22px 52px rgba(11, 15, 25, .18) !important;
+        min-height: 240px !important;
+        overflow: hidden !important;
+      }
+
+      .visual::before,
+      .visual::after {
+        content: none !important;
+        display: none !important;
+      }
+
       .docroi-radar-premium {
         border: 1px solid rgba(199, 206, 216, .9) !important;
         border-radius: 18px !important;
