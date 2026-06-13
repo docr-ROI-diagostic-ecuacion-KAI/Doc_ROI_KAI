@@ -9,16 +9,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        <style>{`.siteHeader .navLinks a:not(.navCta){display:none!important;}`}</style>
         {children}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function normalizeDocRoiHeader(){
                 function run(){
-                  var links = document.querySelectorAll('.siteHeader .navLinks a');
-                  links.forEach(function(link){
-                    if (!link.classList.contains('navCta')) link.style.display = 'none';
-                  });
                   var cta = document.querySelector('.siteHeader .navCta');
                   if (!cta) return;
                   cta.textContent = 'Ecuación KAI';
