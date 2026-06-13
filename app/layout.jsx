@@ -108,7 +108,6 @@ export default function RootLayout({ children }) {
                   var kai = readNumber(readMetric('Potencial de activacion'));
                   var data = readNumber(readMetric('Inteligencia de datos'));
                   var spo = readNumber(readMetric('Orquestacion cliente-oferta'));
-                  var mdText = readMetric('Margen diagnosticado') || '';
                   var maturity = readNumber(readMetric('Madurez ejecutiva'));
                   var ce = rawValue && rawValue.indexOf('x') > -1 ? readNumber(rawValue) : null;
 
@@ -126,7 +125,7 @@ export default function RootLayout({ children }) {
                     return 'Clientes, oferta y satisfacción están razonablemente conectados. El siguiente paso es usarlo para priorizar cartera y acciones.';
                   }
                   if (label === 'Margen diagnosticado') {
-                    return 'Este importe viene de lo que has declarado como ingresos/margen potencial y eficiencia capturable. No es promesa: es la base económica sobre la que la fórmula calcula valor activable.';
+                    return 'Este importe viene de lo declarado como ingresos/margen potencial y eficiencia capturable. No es promesa: es la base económica sobre la que la fórmula calcula valor activable.';
                   }
                   if (label === 'Customer Equity') {
                     if (ce !== null && ce < 0) return 'Sale negativo porque el ROI estimado no supera el WACC. En sencillo: el valor activado no compensa todavía el coste y la referencia financiera exigida.';
@@ -158,9 +157,10 @@ export default function RootLayout({ children }) {
                     if (!comment) {
                       comment = document.createElement('div');
                       comment.className = 'metricComment';
+                      comment.style.cssText = 'margin-top:12px;padding:12px 13px;border-top:1px solid rgba(199,206,216,.72);border-radius:14px;background:#F6F7F9;color:#111827;font-size:13px;line-height:1.55;';
                       card.appendChild(comment);
                     }
-                    comment.innerHTML = '<b>Lectura simple:</b> ' + explanationFor(label, value.textContent.trim());
+                    comment.innerHTML = '<b style="display:block;color:#003B5C;margin-bottom:4px;">Lectura simple</b>' + explanationFor(label, value.textContent.trim());
                   });
                 }
 
